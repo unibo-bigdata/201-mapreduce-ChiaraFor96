@@ -14,23 +14,30 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
+//hadoop jar BD-201-mapreduce.jar exercise4.Ex4AverageWordLength /bigdata/dataset/capra mapreduce/ex4capra/output
+//hdfs dfs -cat mapreduce/ex4capra/output/* | head -n 30
 public class Ex4AverageWordLength {
 
 	public static class Ex4Mapper extends Mapper<Object, Text, Text, IntWritable> {
-
-		private Text word = new Text(), firstLetter = new Text();
-		private IntWritable wordLength = new IntWritable();
-
 		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-			//TODO mapper code
+			StringTokenizer itr = new StringTokenizer(value.toString());
+			while (itr.hasMoreTokens()) {
+				String line = itr.nextToken();
+				context.write(new Text(line.substring(0, 1)), new IntWritable(line.length()));
+			}
 		}
 	}
 
 	public static class Ex4Reducer extends Reducer<Text, IntWritable, Text, DoubleWritable> {
-
 		public void reduce(Text key, Iterable<IntWritable> values, Context context)
 				throws IOException, InterruptedException {
-			//TODO reducer code
+			int sum = 0;
+			int count = 0;
+			for (IntWritable val : values) {
+				sum += val.get();
+				count++;
+			}
+			context.write(key, new DoubleWritable((double) sum / count));
 		}
 	}
 
